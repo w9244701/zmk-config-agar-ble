@@ -4,12 +4,10 @@ manifest:
       url-base: https://github.com/zmkfirmware
     - name: yangdigi
       url-base: https://github.com/yangdigi
-    # Additional modules containing boards/shields/custom code can be listed here as well
-    # See https://docs.zephyrproject.org/3.2.0/develop/west/manifest.html#projects
   projects:
     - name: zmk
-      remote: yangdigi
-      revision: v0.3
+      remote: zmkfirmware  # <-- 여기를 공식 ZMK 저장소로 변경했습니다.
+      revision: main       # <-- 여기를 ZMK Studio를 지원하는 최신 버전으로 변경했습니다.
       import: app/west.yml
     - name: zmk-keyboards-klink
       remote: yangdigi
