@@ -9,10 +9,10 @@ manifest:
   projects:
     - name: zmk
       remote: yangdigi
-      revision: main
+      revision: v0.1
       import: app/west.yml
     - name: zmk-keyboards-klink
       remote: yangdigi
-      revision: main
+      revision: v0.1
   self:
     path: config
