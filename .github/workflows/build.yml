@@ -1,6 +1,8 @@
-name: Build ZMK firmware
+name: Build
+
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
-    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@main
+    # 이 줄의 끝부분을 반드시 @v0.3 으로 바꿔야 합니다!
+    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
