@@ -7,7 +7,7 @@ manifest:
   projects:
     - name: zmk
       remote: zmkfirmware  # <--- 1. 본체는 무조건 공식 저장소에서!
-      revision: main       # <--- 2. 버전은 klink 보드와 호환되는 v0.3으로!
+      revision: v0.3      # <--- 2. 버전은 klink 보드와 호환되는 v0.3으로!
       import: app/west.yml
     - name: zmk-keyboards-klink
       remote: yangdigi
