@@ -6,8 +6,8 @@ manifest:
       url-base: https://github.com/yangdigi
   projects:
     - name: zmk
-      remote: zmkfirmware  # <-- 여기를 공식 ZMK 저장소로 변경했습니다.
-      revision: main       # <-- 여기를 ZMK Studio를 지원하는 최신 버전으로 변경했습니다.
+      remote: yangdigi     # <-- 다시 yangdigi로 복구합니다.
+      revision: v0.3       # <-- 버전도 커스텀 호환성이 맞는 v0.3으로 복구합니다.
       import: app/west.yml
     - name: zmk-keyboards-klink
       remote: yangdigi
