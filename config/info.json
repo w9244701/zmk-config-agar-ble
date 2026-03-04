@@ -1,6 +1,6 @@
 {
-  "id": "custom_60_layout",
-  "name": "Custom 60 Percent",
+  "id": "agar_ble",
+  "name": "agar",
   "layouts": {
     "layout0": {
       "name": "60% Modified (with Num Row)",
@@ -36,4 +36,5 @@
     }
   },
   "sensors": []
+
 }
