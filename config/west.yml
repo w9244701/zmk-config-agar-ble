@@ -6,8 +6,8 @@ manifest:
       url-base: https://github.com/yangdigi
   projects:
     - name: zmk
-      remote: yangdigi     # <-- 다시 yangdigi로 복구합니다.
-      revision: v0.3       # <-- 버전도 커스텀 호환성이 맞는 v0.3으로 복구합니다.
+      remote: zmkfirmware  # <--- 1. 본체는 무조건 공식 저장소에서!
+      revision: v0.3       # <--- 2. 버전은 klink 보드와 호환되는 v0.3으로!
       import: app/west.yml
     - name: zmk-keyboards-klink
       remote: yangdigi
