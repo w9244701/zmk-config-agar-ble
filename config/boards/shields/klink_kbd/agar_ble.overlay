@@ -7,9 +7,6 @@
 
 / {
 
-chosen {
-        zmk,physical-layout = &layout1;
-    };
     matrix_transform_1: matrix_transform_1 {
         compatible = "zmk,matrix-transform";
         rows = <5>; columns = <14>;
