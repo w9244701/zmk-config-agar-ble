@@ -15,5 +15,5 @@
 include:
   - board: klink
     shield: agar_ble
-    snippet: studio-rpc-usb-uart
-    cmake-args: -DCONFIG_ZMK_STUDIO=y
+    #snippet: studio-rpc-usb-uart
+    #cmake-args: -DCONFIG_ZMK_STUDIO=y
