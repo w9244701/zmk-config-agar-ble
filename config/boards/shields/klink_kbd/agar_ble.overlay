@@ -6,7 +6,7 @@
 #define N(x) (59-x)
 
 / {
-// 🎯 ZMK에게 기본 레이아웃으로 2U BS(layout1)을 사용하라고 명시적으로 지정합니다.
+
 chosen {
         zmk,physical-layout = &layout1;
     };
