@@ -18,9 +18,9 @@
 
         layer1 {
             bindings = <
-&kp CAPSLOCK  &kp F1        &kp F2           &kp F3    &kp F4          &kp F5  &kp F6                 &kp F7           &kp F8         &kp F9           &kp F10          &kp F11          &kp F12          &kp INSERT
-&kp DELETE    &kp CAPSLOCK  &kp PRINTSCREEN  &kp UP    &kp SCROLLLOCK  &trans  &trans                 &trans           &Device_USB    &device_bt1 0 0  &device_bt2 0 1  &device_bt3 0 2  &kp UP_ARROW     &trans
-&trans        &trans        &kp LEFT         &kp DOWN  &kp RIGHT       &trans  &trans                 &kp KP_MULTIPLY  &kp KP_DIVIDE  &kp HOME         &kp PAGE_UP      &kp LEFT_ARROW   &kp RIGHT_ARROW
+&kp CAPSLOCK  &kp F1        &kp F2           &kp F3        &kp F4          &kp F5  &kp F6                 &kp F7           &kp F8         &kp F9           &kp F10          &kp F11          &kp F12          &kp DELETE
+&Device_USB   &device_bt1   &device_bt2      &device_bt3   &trans      &trans      &trans                 &trans           &trans         &trans           &trans           &trans           &trans 
+&trans        &trans        &trans           &trans       &trans      &trans                 &kp KP_MULTIPLY  &kp KP_DIVIDE  &kp HOME         &kp PAGE_UP      &kp LEFT_ARROW   &kp RIGHT_ARROW
 &trans        &trans        &trans           &trans    &trans          &trans  &bootloader_reset 0 0  &kp KP_PLUS      &kp KP_MINUS   &kp END          &kp PAGE_DOWN    &kp DOWN_ARROW   &kp C_VOL_UP
               &trans        &trans                                     &trans                                                                          &trans           &kp C_MUTE
             >;
