@@ -21,8 +21,8 @@
 &kp CAPSLOCK  &kp F1       &kp F2       &kp F3       &kp F4                 &kp F5      &kp F6  &kp F7      &kp F8           &kp F9             &kp F10       &kp F11    &kp F12  &kp DELETE
 &Device_USB   &device_bt1  &device_bt2  &device_bt3  &trans                 &trans      &trans  &trans      &trans           &trans             &kp UP_ARROW  &kp HOME   &kp END  &trans
 &trans        &trans       &trans       &trans       &trans                 &trans      &trans  &trans      &trans           &kp LEFT_ARROW     &kp DOWN      &kp RIGHT  &trans
-&trans        &trans       &trans       &trans       &bootloader_reset 0 0  &trans      &trans  &kp C_MUTE  &kp C_VOLUME_UP  &kp C_VOLUME_DOWN  &trans        &trans     &trans
-              &trans       &trans                                           &kp C_MUTE
+&trans        &trans       &trans       &trans       &trans&transt     &trans  &kp C_MUTE  &kp C_VOLUME_UP  &kp C_VOLUME_DOWN  &trans        &trans     &trans
+              &trans       &trans                                          &bootloader_rese
             >;
         };
 
