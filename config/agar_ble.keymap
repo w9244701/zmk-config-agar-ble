@@ -31,11 +31,11 @@
 
         layer1 {
             bindings = <
-&kp CAPSLOCK  &kp F1        &kp F2        &kp F3        &kp F4        &kp F5       &kp F6  &kp F7      &kp F8           &kp F9             &kp F10       &kp F11    &kp F12     &kp DELETE
-&out OUT_USB  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &out OUT_BLE  &trans       &trans  &trans      &trans           &trans             &kp UP_ARROW  &kp HOME   &kp END     &trans
-&trans        &trans        &trans        &trans        &trans        &trans       &trans  &trans      &trans           &kp LEFT_ARROW     &kp DOWN      &kp RIGHT  &sys_reset
-&trans        &trans        &trans        &trans        &trans        &trans       &trans  &kp C_MUTE  &kp C_VOLUME_UP  &kp C_VOLUME_DOWN  &trans        &trans     &trans
-              &trans        &trans                                    &bootloader
+&kp CAPSLOCK  &kp F1        &kp F2        &kp F3        &kp F4  &kp F5       &kp F6  &kp F7      &kp F8           &kp F9             &kp F10       &kp F11    &kp F12     &kp DELETE
+&out OUT_USB  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &trans  &trans       &trans  &trans      &trans           &trans             &kp UP_ARROW  &kp HOME   &kp END     &trans
+&out OUT_BLE  &trans        &trans        &trans        &trans  &trans       &trans  &trans      &trans           &kp LEFT_ARROW     &kp DOWN      &kp RIGHT  &sys_reset
+&trans        &trans        &trans        &trans        &trans  &trans       &trans  &kp C_MUTE  &kp C_VOLUME_UP  &kp C_VOLUME_DOWN  &trans        &trans     &trans
+              &trans        &trans                              &bootloader
             >;
         };
 
