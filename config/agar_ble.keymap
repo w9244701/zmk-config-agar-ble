@@ -16,6 +16,29 @@
         };
     };
 
+    macros {
+        bt_sel_0: bt_sel_0 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&out OUT_BLE &bt BT_SEL 0>;
+            label = "BT_SEL_0";
+        };
+
+        bt_sel_1: new_macro {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&out OUT_BLE &bt BT_SEL 1>;
+            label = "NEW_MACRO";
+        };
+
+        bt_sel_2: new_macro {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&out OUT_BLE &bt BT_SEL 2>;
+            label = "NEW_MACRO";
+        };
+    };
+
     keymap {
         compatible = "zmk,keymap";
 
@@ -31,11 +54,11 @@
 
         layer1 {
             bindings = <
-&kp CAPSLOCK  &kp F1        &kp F2        &kp F3        &kp F4  &kp F5       &kp F6  &kp F7      &kp F8           &kp F9             &kp F10       &kp F11    &kp F12     &kp DELETE
-&out OUT_USB  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &trans  &trans       &trans  &trans      &trans           &trans             &kp UP_ARROW  &kp HOME   &kp END     &trans
-&out OUT_BLE  &trans        &trans        &trans        &trans  &trans       &trans  &trans      &trans           &kp LEFT_ARROW     &kp DOWN      &kp RIGHT  &sys_reset
-&trans        &trans        &trans        &trans        &trans  &trans       &trans  &kp C_MUTE  &kp C_VOLUME_UP  &kp C_VOLUME_DOWN  &trans        &trans     &trans
-              &trans        &trans                              &bootloader
+&kp CAPSLOCK  &kp F1     &kp F2     &kp F3     &kp F4  &kp F5       &kp F6  &kp F7      &kp F8           &kp F9             &kp F10       &kp F11    &kp F12     &kp DELETE
+&out OUT_USB  &bt_sel_0  &bt_sel_1  &bt_sel_2  &trans  &trans       &trans  &trans      &trans           &trans             &kp UP_ARROW  &kp HOME   &kp END     &trans
+&trans        &trans     &trans     &trans     &trans  &trans       &trans  &trans      &trans           &kp LEFT_ARROW     &kp DOWN      &kp RIGHT  &sys_reset
+&trans        &trans     &trans     &trans     &trans  &trans       &trans  &kp C_MUTE  &kp C_VOLUME_UP  &kp C_VOLUME_DOWN  &trans        &trans     &trans
+              &trans     &trans                        &bootloader
             >;
         };
 
