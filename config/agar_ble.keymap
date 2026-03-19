@@ -75,14 +75,14 @@
         bt1_clr: bt1_clr {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings = <&out OUT_BLE &bt BT_SEL 0 &bt BT_CLR>;
+            bindings = <&out OUT_BLE &bt BT_SEL 1 &bt BT_CLR>;
             label = "BT1_CLR";
         };
 
         bt2_clr: bt2_clr {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings = <&out OUT_BLE &bt BT_SEL 0 &bt BT_CLR>;
+            bindings = <&out OUT_BLE &bt BT_SEL 2 &bt BT_CLR>;
             label = "BT2_CLR";
         };
     };
