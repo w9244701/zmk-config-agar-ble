@@ -14,6 +14,33 @@
             #binding-cells = <0>;
             mods = <(MOD_LALT)>;
         };
+
+        bt00: bt00 {
+            compatible = "zmk,behavior-hold-tap";
+            label = "BT00";
+            bindings = <&bt0_clr>, <&bt_sel_0>;
+
+            #binding-cells = <2>;
+            tapping-term-ms = <3000>;
+        };
+
+        bt01: bt01 {
+            compatible = "zmk,behavior-hold-tap";
+            label = "BT01";
+            bindings = <&bt1_clr>, <&bt_sel_1>;
+
+            #binding-cells = <2>;
+            tapping-term-ms = <3000>;
+        };
+
+        bt02: bt02 {
+            compatible = "zmk,behavior-hold-tap";
+            label = "BT02";
+            bindings = <&bt2_clr>, <&bt_sel_2>;
+
+            #binding-cells = <2>;
+            tapping-term-ms = <3000>;
+        };
     };
 
     macros {
@@ -37,6 +64,27 @@
             bindings = <&out OUT_BLE &bt BT_SEL 2>;
             label = "NEW_MACRO";
         };
+
+        bt0_clr: bt0_clr {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&out OUT_BLE &bt BT_SEL 0 &bt BT_CLR>;
+            label = "BT0_CLR";
+        };
+
+        bt1_clr: bt1_clr {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&out OUT_BLE &bt BT_SEL 0 &bt BT_CLR>;
+            label = "BT1_CLR";
+        };
+
+        bt2_clr: bt2_clr {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&out OUT_BLE &bt BT_SEL 0 &bt BT_CLR>;
+            label = "BT2_CLR";
+        };
     };
 
     keymap {
@@ -55,7 +103,7 @@
         layer1 {
             bindings = <
 &kp CAPSLOCK  &kp F1     &kp F2     &kp F3     &kp F4  &kp F5       &kp F6  &kp F7      &kp F8           &kp F9             &kp F10       &kp F11    &kp F12     &kp DELETE
-&out OUT_USB  &bt_sel_0  &bt_sel_1  &bt_sel_2  &trans  &trans       &trans  &trans      &trans           &trans             &kp UP_ARROW  &kp HOME   &kp END     &trans
+&out OUT_USB  &bt00 0 0  &bt01 0 0  &bt02 0 0  &trans  &trans       &trans  &trans      &trans           &trans             &kp UP_ARROW  &kp HOME   &kp END     &trans
 &trans        &trans     &trans     &trans     &trans  &trans       &trans  &trans      &trans           &kp LEFT_ARROW     &kp DOWN      &kp RIGHT  &sys_reset
 &trans        &trans     &trans     &trans     &trans  &trans       &trans  &kp C_MUTE  &kp C_VOLUME_UP  &kp C_VOLUME_DOWN  &trans        &trans     &trans
               &trans     &trans                        &bootloader
