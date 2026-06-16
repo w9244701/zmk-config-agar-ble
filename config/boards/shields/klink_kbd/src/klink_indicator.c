@@ -8,8 +8,10 @@
 #include <zmk/battery.h>
 #include <zmk/ble.h>
 #include <zmk/endpoints.h>
+#include <zmk/endpoints_types.h>
 #include <zmk/hid_indicators.h>
 #include <zmk/events/ble_active_profile_changed.h>
+#include <zmk/events/endpoint_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/hid_indicators_changed.h>
@@ -25,10 +27,12 @@
 #define COLOR_RED BIT(0)
 #define COLOR_GREEN BIT(1)
 #define COLOR_BLUE BIT(2)
+#define COLOR_WHITE (COLOR_RED | COLOR_GREEN | COLOR_BLUE)
 #define COLOR_OFF 0
 
 #define BATTERY_LOW_PERCENT 10
 #define BT_PROFILE_COUNT 4
+#define FEEDBACK_TICKS 150  // ~3s of connection-change feedback at 20ms/tick
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
@@ -49,10 +53,8 @@ static const uint8_t led_idx[] = {DT_NODE_CHILD_IDX(DT_ALIAS(indicator_r)),
 
 struct indicator_state_t {
     uint8_t keylock;
-    uint8_t connection;
-    uint8_t active_device;
     uint8_t battery;
-    uint8_t flash_times;
+    uint16_t feedback_ticks;  // remaining ticks to show solid connection color
 } indicator_state;
 
 static void set_indicator_color(uint8_t bits) {
@@ -92,20 +94,17 @@ struct blink_item {
 K_MSGQ_DEFINE(led_msgq, sizeof(struct blink_item), 16, 1);
 
 
+// Show the solid connection color (USB white / BLE blue) for a few seconds
+// after any connection change, then fall back to the Caps Lock indicator.
+static void show_connection_feedback(void) {
+    indicator_state.feedback_ticks = FEEDBACK_TICKS;
+}
+
 static void ble_active_profile_update(void) {
     uint8_t profile_index = zmk_ble_active_profile_index();
     if (profile_index >= BT_PROFILE_COUNT) return;
-    indicator_state.active_device = profile_index;
-    if (zmk_ble_active_profile_is_connected()) {
-        indicator_state.connection = 2;
-        indicator_state.flash_times = 3*4;
-    //} else if (zmk_ble_active_profile_is_open()) {
-    } else {
-        indicator_state.connection = 1;
-        indicator_state.flash_times = 15*4;
-    }
-    LOG_DBG("Device_BT%d, Connection State: %d", indicator_state.active_device+1, indicator_state.connection);
-    return;
+    show_connection_feedback();
+    LOG_DBG("Device_BT%d feedback", profile_index + 1);
 }
 
 static void ble_active_profile_update_cb(const zmk_event_t *eh) {
@@ -114,6 +113,15 @@ static void ble_active_profile_update_cb(const zmk_event_t *eh) {
 
 ZMK_LISTENER(ble_active_profile_listener, ble_active_profile_update_cb);
 ZMK_SUBSCRIPTION(ble_active_profile_listener, zmk_ble_active_profile_changed);
+
+// USB <-> BLE transport switches don't emit SHOW_LED, so trigger feedback here too.
+static int endpoint_changed_cb(const zmk_event_t *eh) {
+    show_connection_feedback();
+    return 0;
+}
+
+ZMK_LISTENER(led_endpoint_listener, endpoint_changed_cb);
+ZMK_SUBSCRIPTION(led_endpoint_listener, zmk_endpoint_changed);
 
 #include <zmk/events/keycode_state_changed.h>
 static int zmk_handle_keycode_user(struct zmk_keycode_state_changed *event) {
@@ -164,34 +172,35 @@ void led_process_thread(void) {
             continue;
         }
 
-        // Priority 2: Bluetooth profile/connection feedback blinks blue for a limited time.
-        if (indicator_state.connection > 0) {
-            if (indicator_state.active_device >= BT_PROFILE_COUNT) {
-                indicator_state.connection = 0;
+        bool on_usb = (zmk_endpoints_selected().transport == ZMK_TRANSPORT_USB);
+
+        // Priority 2: BLE pairing (profile open, not yet connected) blinks blue
+        // for as long as pairing is in progress.
+        if (!on_usb && zmk_ble_active_profile_is_open() &&
+            !zmk_ble_active_profile_is_connected()) {
+            if ((led_timer_steps >> 4) & 0x1) {
+                set_indicator_color(COLOR_BLUE);
+            } else {
                 set_indicator_color(COLOR_OFF);
-                continue;
             }
-
-            if ((led_timer_steps & 0xf) == 0xf) {
-                if (indicator_state.flash_times > 0) {
-                    indicator_state.flash_times--;
-                }
-
-                if ((led_timer_steps >> 4) & 0x1) {
-                    set_indicator_color(COLOR_BLUE);
-                } else {
-                    set_indicator_color(COLOR_OFF);
-                }
-
-                if (indicator_state.flash_times == 0) {
-                    indicator_state.connection = 0;
-                }
-            }
-
             continue;
         }
 
-        // Priority 3: Caps Lock is solid green.
+        // Priority 3: for a few seconds after a connection change, show the
+        // solid connection color: white on USB, blue on a connected BLE profile.
+        if (indicator_state.feedback_ticks > 0) {
+            indicator_state.feedback_ticks--;
+            if (on_usb) {
+                set_indicator_color(COLOR_WHITE);
+            } else if (zmk_ble_active_profile_is_connected()) {
+                set_indicator_color(COLOR_BLUE);
+            } else {
+                set_indicator_color(COLOR_OFF);
+            }
+            continue;
+        }
+
+        // Priority 4: Caps Lock is solid green, otherwise the LED is off.
         if (indicator_state.keylock & CAPSLOCK_BIT) {
             set_indicator_color(COLOR_GREEN);
         } else {
@@ -206,7 +215,7 @@ K_THREAD_DEFINE(led_process_tid, 1024, led_process_thread, NULL, NULL, NULL, K_L
 
 
 void klink_indicator_init_thread(void) {
-    indicator_state.connection = 1;
+    indicator_state.feedback_ticks = 0;
     // zmk_ble_set_device_name("Tofu60 v3.0z BLE");
     indicator_state.battery = 111;
 }
