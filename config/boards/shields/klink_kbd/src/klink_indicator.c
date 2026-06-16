@@ -191,7 +191,7 @@ void led_process_thread(void) {
         // profile color for as long as pairing is in progress.
         if (!on_usb && zmk_ble_active_profile_is_open() &&
             !zmk_ble_active_profile_is_connected()) {
-            if ((led_timer_steps >> 4) & 0x1) {
+            if ((led_timer_steps >> 3) & 0x1) {
                 set_indicator_color(active_profile_color());
             } else {
                 set_indicator_color(COLOR_OFF);
