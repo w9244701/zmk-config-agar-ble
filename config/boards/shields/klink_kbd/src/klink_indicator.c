@@ -68,6 +68,7 @@ struct indicator_state_t {
     uint8_t keylock;
     uint8_t battery;
     uint16_t feedback_ticks;  // remaining ticks to show solid connection color
+    bool pairing;             // BT key pressed and not connected yet -> blink until connected
 } indicator_state;
 
 static void set_indicator_color(uint8_t bits) {
@@ -117,7 +118,10 @@ static void ble_active_profile_update(void) {
     uint8_t profile_index = zmk_ble_active_profile_index();
     if (profile_index >= BT_PROFILE_COUNT) return;
     show_connection_feedback();
-    LOG_DBG("Device_BT%d feedback", profile_index + 1);
+    // BT key pressed: if this profile isn't connected, we're pairing/reconnecting
+    // -> blink until it actually connects.
+    indicator_state.pairing = !zmk_ble_active_profile_is_connected();
+    LOG_DBG("Device_BT%d feedback, pairing=%d", profile_index + 1, indicator_state.pairing);
 }
 
 static void ble_active_profile_update_cb(const zmk_event_t *eh) {
@@ -130,6 +134,10 @@ ZMK_SUBSCRIPTION(ble_active_profile_listener, zmk_ble_active_profile_changed);
 // USB <-> BLE transport switches don't emit SHOW_LED, so trigger feedback here too.
 static int endpoint_changed_cb(const zmk_event_t *eh) {
     show_connection_feedback();
+    // Switching output to USB means the user gave up on pairing -> stop blinking.
+    if (zmk_endpoints_selected().transport == ZMK_TRANSPORT_USB) {
+        indicator_state.pairing = false;
+    }
     return 0;
 }
 
@@ -187,19 +195,17 @@ void led_process_thread(void) {
 
         bool on_usb = (zmk_endpoints_selected().transport == ZMK_TRANSPORT_USB);
 
-        // Priority 2: BLE pairing in progress (profile open, not yet connected)
-        // blinks the profile color. ZMK reports USB as the selected output when
-        // a cable is attached but BLE hasn't connected yet, so don't let that
-        // white mask an active pairing attempt: on battery blink the whole time;
-        // on USB fallback blink while a recent BT key press is still in its
-        // feedback window. A USB-only user who never pressed a BT key keeps the
-        // white indicator.
-        if (zmk_ble_active_profile_is_open() &&
-            !zmk_ble_active_profile_is_connected() &&
-            (!on_usb || indicator_state.feedback_ticks > 0)) {
-            if (indicator_state.feedback_ticks > 0) {
-                indicator_state.feedback_ticks--;
-            }
+        // Once connected, clear the pairing flag.
+        if (zmk_ble_active_profile_is_connected()) {
+            indicator_state.pairing = false;
+        }
+
+        // Priority 2: BLE pairing/reconnecting (user pressed a BT key and it's
+        // not connected yet) blinks the profile color until it connects. This
+        // wins over the USB-fallback white that ZMK reports while a cable is
+        // attached but BLE hasn't connected. A USB-only user who never pressed a
+        // BT key has pairing=false and keeps the white indicator.
+        if (indicator_state.pairing && !zmk_ble_active_profile_is_connected()) {
             if ((led_timer_steps >> 3) & 0x1) {
                 set_indicator_color(active_profile_color());
             } else {
@@ -239,6 +245,7 @@ K_THREAD_DEFINE(led_process_tid, 1024, led_process_thread, NULL, NULL, NULL, K_L
 
 void klink_indicator_init_thread(void) {
     indicator_state.feedback_ticks = 0;
+    indicator_state.pairing = false;
     // zmk_ble_set_device_name("Tofu60 v3.0z BLE");
     indicator_state.battery = 111;
 }
