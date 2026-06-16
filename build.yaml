@@ -17,3 +17,5 @@ include:
     shield: agar_ble
     #snippet: studio-rpc-usb-uart
     #cmake-args: -DCONFIG_ZMK_STUDIO=y
+  - board: klink
+    shield: settings_reset
