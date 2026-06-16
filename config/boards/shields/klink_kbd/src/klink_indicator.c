@@ -28,10 +28,23 @@
 #define COLOR_GREEN BIT(1)
 #define COLOR_BLUE BIT(2)
 #define COLOR_WHITE (COLOR_RED | COLOR_GREEN | COLOR_BLUE)
+#define COLOR_YELLOW (COLOR_RED | COLOR_GREEN)
+#define COLOR_MAGENTA (COLOR_RED | COLOR_BLUE)
 #define COLOR_OFF 0
 
 #define BATTERY_LOW_PERCENT 10
 #define BT_PROFILE_COUNT 4
+
+// Per-profile connection color: BT0 blue, BT1 yellow, BT2 magenta.
+static const uint8_t profile_color[3] = {COLOR_BLUE, COLOR_YELLOW, COLOR_MAGENTA};
+
+static uint8_t active_profile_color(void) {
+    uint8_t idx = zmk_ble_active_profile_index();
+    if (idx < ARRAY_SIZE(profile_color)) {
+        return profile_color[idx];
+    }
+    return COLOR_BLUE;
+}
 #define FEEDBACK_TICKS 150  // ~3s of connection-change feedback at 20ms/tick
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
@@ -174,12 +187,12 @@ void led_process_thread(void) {
 
         bool on_usb = (zmk_endpoints_selected().transport == ZMK_TRANSPORT_USB);
 
-        // Priority 2: BLE pairing (profile open, not yet connected) blinks blue
-        // for as long as pairing is in progress.
+        // Priority 2: BLE pairing (profile open, not yet connected) blinks the
+        // profile color for as long as pairing is in progress.
         if (!on_usb && zmk_ble_active_profile_is_open() &&
             !zmk_ble_active_profile_is_connected()) {
             if ((led_timer_steps >> 4) & 0x1) {
-                set_indicator_color(COLOR_BLUE);
+                set_indicator_color(active_profile_color());
             } else {
                 set_indicator_color(COLOR_OFF);
             }
@@ -187,13 +200,14 @@ void led_process_thread(void) {
         }
 
         // Priority 3: for a few seconds after a connection change, show the
-        // solid connection color: white on USB, blue on a connected BLE profile.
+        // solid connection color: white on USB, the per-profile color on a
+        // connected BLE profile (BT0 blue / BT1 yellow / BT2 magenta).
         if (indicator_state.feedback_ticks > 0) {
             indicator_state.feedback_ticks--;
             if (on_usb) {
                 set_indicator_color(COLOR_WHITE);
             } else if (zmk_ble_active_profile_is_connected()) {
-                set_indicator_color(COLOR_BLUE);
+                set_indicator_color(active_profile_color());
             } else {
                 set_indicator_color(COLOR_OFF);
             }
