@@ -22,6 +22,14 @@
 #define CAPSLOCK_BIT BIT(1)
 #define SCROLLLOCK_BIT BIT(2)
 
+#define COLOR_RED BIT(0)
+#define COLOR_GREEN BIT(1)
+#define COLOR_BLUE BIT(2)
+#define COLOR_OFF 0
+
+#define BATTERY_LOW_PERCENT 10
+#define BT_PROFILE_COUNT 4
+
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #define LED_GPIO_NODE_ID DT_COMPAT_GET_ANY_STATUS_OKAY(gpio_leds)
@@ -86,7 +94,7 @@ K_MSGQ_DEFINE(led_msgq, sizeof(struct blink_item), 16, 1);
 
 static void ble_active_profile_update(void) {
     uint8_t profile_index = zmk_ble_active_profile_index();
-    if (profile_index > 3) return;
+    if (profile_index >= BT_PROFILE_COUNT) return;
     indicator_state.active_device = profile_index;
     if (zmk_ble_active_profile_is_connected()) {
         indicator_state.connection = 2;
@@ -146,47 +154,48 @@ ZMK_SUBSCRIPTION(led_battery_listener, zmk_battery_state_changed);
 void led_process_thread(void) {
     while (true) {
         k_sleep(K_MSEC(20));
+
         static uint16_t led_timer_steps = 0;
         led_timer_steps++;
 
+        // Priority 1: low battery is always solid red.
+        if (indicator_state.battery < BATTERY_LOW_PERCENT) {
+            set_indicator_color(COLOR_RED);
+            continue;
+        }
+
+        // Priority 2: Bluetooth profile/connection feedback blinks blue for a limited time.
         if (indicator_state.connection > 0) {
-                static uint8_t profile_color_bits[3]= {0b011, 0b110, 0b101};
-            if (indicator_state.active_device >= 3) {
-                return;
+            if (indicator_state.active_device >= BT_PROFILE_COUNT) {
+                indicator_state.connection = 0;
+                set_indicator_color(COLOR_OFF);
+                continue;
             }
 
             if ((led_timer_steps & 0xf) == 0xf) {
-                indicator_state.flash_times--;
-                uint8_t color_bits = profile_color_bits[indicator_state.active_device];
-                switch ((led_timer_steps >> 4) & 0x3) {
-                    case 0:
-                        set_indicator_color(0);
-                        break;
-                    case 1:
-                        set_indicator_color(color_bits);
-                        break;
-                    case 2:
-                        if (indicator_state.connection != 2) set_indicator_color(0);
-                        break;
-                    case 3:
-                        if (indicator_state.connection != 2) {
-                            bt_addr_le_t *addr = zmk_ble_active_profile_addr();
-                            if ( bt_addr_le_eq(addr, BT_ADDR_LE_ANY) ) set_indicator_color(0b001); //red color
-                            else set_indicator_color(0b100); //blue color
-                        }
-                        break;
+                if (indicator_state.flash_times > 0) {
+                    indicator_state.flash_times--;
                 }
-                if (indicator_state.flash_times == 0) indicator_state.connection = 0;
+
+                if ((led_timer_steps >> 4) & 0x1) {
+                    set_indicator_color(COLOR_BLUE);
+                } else {
+                    set_indicator_color(COLOR_OFF);
+                }
+
+                if (indicator_state.flash_times == 0) {
+                    indicator_state.connection = 0;
+                }
             }
-        } else if (indicator_state.battery < 10) {
-            if ((led_timer_steps & 0x1f) == 0xf) set_indicator_color(0b001);
-            else if ((led_timer_steps & 0x1f) == 0x1f) set_indicator_color(0);
+
+            continue;
+        }
+
+        // Priority 3: Caps Lock is solid green.
+        if (indicator_state.keylock & CAPSLOCK_BIT) {
+            set_indicator_color(COLOR_GREEN);
         } else {
-            if (indicator_state.keylock & CAPSLOCK_BIT) {
-                set_indicator_color(0b101);
-            } else {
-                set_indicator_color(0);
-            }
+            set_indicator_color(COLOR_OFF);
         }
     }
 }
