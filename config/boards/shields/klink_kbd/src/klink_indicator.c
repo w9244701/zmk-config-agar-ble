@@ -187,10 +187,19 @@ void led_process_thread(void) {
 
         bool on_usb = (zmk_endpoints_selected().transport == ZMK_TRANSPORT_USB);
 
-        // Priority 2: BLE pairing (profile open, not yet connected) blinks the
-        // profile color for as long as pairing is in progress.
-        if (!on_usb && zmk_ble_active_profile_is_open() &&
-            !zmk_ble_active_profile_is_connected()) {
+        // Priority 2: BLE pairing in progress (profile open, not yet connected)
+        // blinks the profile color. ZMK reports USB as the selected output when
+        // a cable is attached but BLE hasn't connected yet, so don't let that
+        // white mask an active pairing attempt: on battery blink the whole time;
+        // on USB fallback blink while a recent BT key press is still in its
+        // feedback window. A USB-only user who never pressed a BT key keeps the
+        // white indicator.
+        if (zmk_ble_active_profile_is_open() &&
+            !zmk_ble_active_profile_is_connected() &&
+            (!on_usb || indicator_state.feedback_ticks > 0)) {
+            if (indicator_state.feedback_ticks > 0) {
+                indicator_state.feedback_ticks--;
+            }
             if ((led_timer_steps >> 3) & 0x1) {
                 set_indicator_color(active_profile_color());
             } else {
